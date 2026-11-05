@@ -6,6 +6,9 @@ from Xlib import X, Xatom, display
 import subprocess
 import os
 import re
+import time
+import socket
+import json
 import signal
 import sys
 import threading
@@ -67,8 +70,33 @@ def play(title, token):
     pos = playerctl("position") or "0"
     live["proc"] = subprocess.Popen(
         ["mpv", f"--wid={live['win'].id}", "--no-audio", "--loop", "--no-osc", "--vo=x11", "--hwdec=no", "--profile=fast",
-         "--no-input-default-bindings", f"--start={pos}", stream],
+         "--no-input-default-bindings", f"--start={pos}", f"--input-ipc-server={SOCK}", stream],
         stdout=subprocess.DEVNULL, stderr=open("/tmp/live-fullscreen-wallpaper-mpv.log", "w"))
+    threading.Thread(target=resync, args=(live["proc"],), daemon=True).start()
+
+SOCK = "/tmp/live-fullscreen-wallpaper-mpv.sock"
+
+def mpv_cmd(*cmd):
+    s = socket.socket(socket.AF_UNIX)
+    s.settimeout(1)
+    s.connect(SOCK)
+    s.sendall((json.dumps({"command": list(cmd)}) + "\n").encode())
+    for line in s.makefile():  # skip async event lines until the command reply
+        reply = json.loads(line)
+        if "error" in reply:
+            return reply.get("data")
+
+def resync(proc):
+    # shortcut: seeks on drift > 1.5 s, every 5 s; upgrade = playback-speed nudging for smoother catch-up
+    time.sleep(3)
+    while proc.poll() is None:
+        try:
+            pos = float(playerctl("position"))
+            if abs(mpv_cmd("get_property", "time-pos") - pos) > 1.5:
+                mpv_cmd("seek", pos, "absolute")
+        except (OSError, ValueError, TypeError):
+            pass
+        time.sleep(5)
 
 def start_live(title):
     if live["title"] == title and (live["proc"] is None or live["proc"].poll() is None):

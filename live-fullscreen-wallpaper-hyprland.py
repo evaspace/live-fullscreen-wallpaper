@@ -4,6 +4,7 @@ mpvpaper draws on the layer-shell background layer, above swaybg/hyprpaper: kill
 import json
 import os
 import re
+import time
 import signal
 import socket
 import subprocess
@@ -33,8 +34,33 @@ def play(title, token):
         return
     pos = run("playerctl", "-p", PLAYERS, "position") or "0"  # read last: resolve lag is not added to drift
     state["proc"] = subprocess.Popen(
-        ["mpvpaper", "-o", f"no-audio loop start={pos}", "ALL", stream],
+        ["mpvpaper", "-o", f"no-audio loop start={pos} input-ipc-server={SOCK}", "ALL", stream],
         stdout=subprocess.DEVNULL, stderr=open("/tmp/live-fullscreen-wallpaper-mpv.log", "w"))
+    threading.Thread(target=resync, args=(state["proc"],), daemon=True).start()
+
+SOCK = "/tmp/live-fullscreen-wallpaper-mpv.sock"
+
+def mpv_cmd(*cmd):
+    s = socket.socket(socket.AF_UNIX)
+    s.settimeout(1)
+    s.connect(SOCK)
+    s.sendall((json.dumps({"command": list(cmd)}) + "\n").encode())
+    for line in s.makefile():  # skip async event lines until the command reply
+        reply = json.loads(line)
+        if "error" in reply:
+            return reply.get("data")
+
+def resync(proc):
+    # shortcut: seeks on drift > 1.5 s, every 5 s; upgrade = playback-speed nudging for smoother catch-up
+    time.sleep(3)
+    while proc.poll() is None:
+        try:
+            pos = float(run("playerctl", "-p", PLAYERS, "position"))
+            if abs(mpv_cmd("get_property", "time-pos") - pos) > 1.5:
+                mpv_cmd("seek", pos, "absolute")
+        except (OSError, ValueError, TypeError):
+            pass
+        time.sleep(5)
 
 def youtube_title(client):
     if client["class"].lower() in BROWSERS and " - YouTube" in client["title"]:

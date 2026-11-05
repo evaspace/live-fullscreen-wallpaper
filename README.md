@@ -42,7 +42,7 @@ Let an AI agent do it for you: see [AI_INSTALL.md](AI_INSTALL.md), or copy `skil
 
 ## Limits
 
-- Startup takes a few seconds (yt-dlp extraction). Sync is approximate and drifts over time.
+- Startup takes a few seconds (yt-dlp extraction). Every 5 s the script re-reads the browser position and seeks mpv if the drift exceeds 1.5 s.
 - Without MPRIS data it falls back to a title search and may play another video.
 - On an Intel Arc B580 + Mesa 26.2.6, mpv's default GPU output aborted Xorg twice (`abort()` in `libgallium` via `libglamoregl`). The script now forces `--vo=x11 --hwdec=no` (software, no GL/vaapi in the client), which avoids that path. If your X server still dies, set `LFW_LIVE=0`. The Hyprland version is not affected.
 - Logs: `/tmp/live-fullscreen-wallpaper.log` and `/tmp/live-fullscreen-wallpaper-mpv.log`.
