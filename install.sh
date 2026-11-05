@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Installs dependencies and hooks the script into i3. Usage: ./install.sh [/path/to/wallpaper.png]
+# Installs dependencies and hooks the script into i3, or Hyprland/Omarchy (Arch only for that one). Usage: ./install.sh [/path/to/wallpaper.png]
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -21,6 +21,16 @@ fi
 for bin in i3 picom; do
   command -v "$bin" >/dev/null || echo "warning: '$bin' not found, it is required (see README)." >&2
 done
+
+if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
+  # Hyprland / Omarchy: Wayland version, needs mpvpaper (extra or AUR)
+  command -v mpvpaper >/dev/null || $SUDO pacman -S --needed mpvpaper 2>/dev/null || yay -S --needed mpvpaper
+  chmod +x "$HERE/live-fullscreen-wallpaper-hyprland.py"
+  HCFG="$HOME/.config/hypr/autostart.conf"; [ -f "$HCFG" ] || HCFG="$HOME/.config/hypr/hyprland.conf"
+  grep -q live-fullscreen-wallpaper "$HCFG" || printf '\n# live-fullscreen-wallpaper\nexec-once = %s\n' "$HERE/live-fullscreen-wallpaper-hyprland.py" >> "$HCFG"
+  echo "Added to $HCFG. Log out and in, or run the script once by hand."
+  exit 0
+fi
 
 chmod +x "$HERE/live-fullscreen-wallpaper.py"
 CFG="${XDG_CONFIG_HOME:-$HOME/.config}/i3/config"

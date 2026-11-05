@@ -18,6 +18,8 @@ WALLPAPER_CMD = ["feh", "--bg-fill", WALLPAPER] if WALLPAPER else ["feh", "--bg-
 BLACK_CMD = ["feh", "--bg-fill", os.path.join(HERE, "assets", "black.png")]
 
 BROWSERS = ("firefox", "brave")
+# Off by default: the live mode crashed Xorg (glamor/Mesa) once, see README. Enable with LFW_LIVE=1
+LIVE = os.environ.get("LFW_LIVE") == "1"
 live = {"title": None, "proc": None, "token": None}
 
 def stop_live():
@@ -98,7 +100,7 @@ def update_wallpaper(i3, e=None):
             log(f"Fullscreen detected on window: {leaf.name}")
             break
             
-    if yt:
+    if yt and LIVE:
         log(f"Live wallpaper: {yt}")
         start_live(yt)
     elif fullscreen:

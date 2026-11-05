@@ -11,7 +11,9 @@ Put a YouTube video fullscreen in Firefox/Chromium/Brave and it also plays as yo
 
 ## Requirements
 
-i3 on X11, a compositor ([picom](https://github.com/yshui/picom)) and transparent windows (e.g. alacritty `opacity = 0.85`), plus `mpv yt-dlp feh playerctl python-i3ipc python-xlib`. Wayland/sway is not supported.
+i3 on X11, a compositor ([picom](https://github.com/yshui/picom)) and transparent windows (e.g. alacritty `opacity = 0.85`), plus `mpv yt-dlp feh playerctl python-i3ipc python-xlib`. 
+
+**Hyprland / Omarchy**: `live-fullscreen-wallpaper-hyprland.py` (Wayland, via `mpvpaper`), set up by `install.sh` when run inside a Hyprland session. Needs `mpv yt-dlp playerctl mpvpaper`, no picom. Untested on real Omarchy so far. Sway and GNOME/KDE are not supported.
 
 ## Install
 
@@ -34,6 +36,7 @@ Let an AI agent do it for you: see [AI_INSTALL.md](AI_INSTALL.md), or copy `skil
 
 - Startup takes a few seconds (yt-dlp extraction). Sync is approximate and drifts over time.
 - Without MPRIS data it falls back to a title search and may play another video.
+- The i3/X11 live mode is off by default (`LFW_LIVE=1` to enable): it crashed Xorg once on an Intel Arc GPU (Mesa glamor). The Hyprland version has no such issue known.
 - Logs: `/tmp/live-fullscreen-wallpaper.log` and `/tmp/live-fullscreen-wallpaper-mpv.log`.
 
 MIT license.
