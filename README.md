@@ -2,7 +2,7 @@
 
 Put a YouTube video fullscreen in Firefox/Chromium/Brave and it also plays as your **live wallpaper**, visible behind your transparent terminals on the other workspaces.
 
-- YouTube fullscreen: the video plays on the desktop layer (muted, same position as the browser, 720p).
+- YouTube fullscreen in Firefox: the extension streams the playing video to the desktop layer (muted, no delay, no yt-dlp).
 - Any other fullscreen window (a game...): black wallpaper.
 - No fullscreen: your normal wallpaper comes back.
 
@@ -36,14 +36,15 @@ Let an AI agent do it for you: see [AI_INSTALL.md](AI_INSTALL.md), or copy `skil
 
 ## How it works
 
-1. i3ipc watches window events and finds a fullscreen browser window titled `... - YouTube`.
-2. `playerctl` (MPRIS) gives the exact video URL and playback position.
-3. `yt-dlp` resolves the stream, `mpv` plays it from the same position in a borderless `_NET_WM_WINDOW_TYPE_DESKTOP` window under everything. picom paints the root pixmap, not the root window, so a real window is needed.
+1. i3ipc watches window events and finds a fullscreen Firefox window titled `... - YouTube`.
+2. The extension (`extension/`) records the player with `captureStream()` + `MediaRecorder` (webm, 100 ms chunks) and sends it through native messaging (`lfw_host.py`) to a unix socket of the daemon.
+3. The daemon pipes it to `mpv`, which plays it in a borderless `_NET_WM_WINDOW_TYPE_DESKTOP` window under everything. picom paints the root pixmap, not the root window, so a real window is needed.
 
 ## Limits
 
-- Startup takes a few seconds (yt-dlp extraction). Every 5 s the script re-reads the browser position and seeks mpv if the drift exceeds 1.5 s.
-- Without MPRIS data it falls back to a title search and may play another video.
+- Firefox only (Hyprland script still uses yt-dlp). DRM-protected (Widevine) videos cannot be captured: black wallpaper.
+- Install the extension: sign it once (free, unlisted) with `web-ext sign -s extension --channel=unlisted --api-key=... --api-secret=...` (keys from addons.mozilla.org/developers/addon/api/key/), then open the `.xpi` in Firefox. Without signing, `firefox --marionette` + `./load_extension.py` loads it as a temporary add-on until the next restart.
+- Cost while streaming: roughly one CPU core in total (Firefox decode + 1280 px VP8 encode + mpv software output).
 - On an Intel Arc B580 + Mesa 26.2.6, mpv's default GPU output aborted Xorg twice (`abort()` in `libgallium` via `libglamoregl`). The script now forces `--vo=x11 --hwdec=no` (software, no GL/vaapi in the client), which avoids that path. If your X server still dies, set `LFW_LIVE=0`. The Hyprland version is not affected.
 - Logs: `/tmp/live-fullscreen-wallpaper.log` and `/tmp/live-fullscreen-wallpaper-mpv.log`.
 

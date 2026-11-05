@@ -32,7 +32,10 @@ if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
   exit 0
 fi
 
-chmod +x "$HERE/live-fullscreen-wallpaper.py"
+chmod +x "$HERE/live-fullscreen-wallpaper.py" "$HERE/lfw_host.py"
+# Firefox native messaging host: lets the extension in extension/ stream the video to the daemon
+NM="$HOME/.mozilla/native-messaging-hosts"; mkdir -p "$NM"
+printf '{"name":"lfw","description":"live-fullscreen-wallpaper","path":"%s/lfw_host.py","type":"stdio","allowed_extensions":["lfw@live-fullscreen-wallpaper"]}\n' "$HERE" > "$NM/lfw.json"
 CFG="${XDG_CONFIG_HOME:-$HOME/.config}/i3/config"
 LINE="exec_always --no-startup-id $HERE/live-fullscreen-wallpaper.py $WALLPAPER"
 if [ -f "$CFG" ] && ! grep -q live-fullscreen-wallpaper "$CFG"; then
