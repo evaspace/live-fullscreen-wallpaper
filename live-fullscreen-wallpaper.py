@@ -18,8 +18,7 @@ WALLPAPER_CMD = ["feh", "--bg-fill", WALLPAPER] if WALLPAPER else ["feh", "--bg-
 BLACK_CMD = ["feh", "--bg-fill", os.path.join(HERE, "assets", "black.png")]
 
 BROWSERS = ("firefox", "brave")
-# Off by default: the live mode crashed Xorg (glamor/Mesa) once, see README. Enable with LFW_LIVE=1
-LIVE = os.environ.get("LFW_LIVE") == "1"
+LIVE = os.environ.get("LFW_LIVE") != "0"  # LFW_LIVE=0 disables the live mode
 live = {"title": None, "proc": None, "token": None}
 
 def stop_live():

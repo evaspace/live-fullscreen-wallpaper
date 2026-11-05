@@ -6,7 +6,7 @@ Put a YouTube video fullscreen in Firefox/Chromium/Brave and it also plays as yo
 - Any other fullscreen window (a game...): black wallpaper.
 - No fullscreen: your normal wallpaper comes back.
 
-<!-- TODO: add screenshot at docs/screenshot.png -->
+
 ![screenshot](docs/screenshot.png)
 
 ## Requirements
@@ -18,7 +18,7 @@ i3 on X11, a compositor ([picom](https://github.com/yshui/picom)) and transparen
 ## Install
 
 ```sh
-git clone https://github.com/<user>/live-fullscreen-wallpaper
+git clone https://github.com/evaspace/live-fullscreen-wallpaper
 cd live-fullscreen-wallpaper
 ./install.sh ~/Pictures/my-wallpaper.png   # pacman / apt / dnf / zypper
 ```
@@ -36,7 +36,7 @@ Let an AI agent do it for you: see [AI_INSTALL.md](AI_INSTALL.md), or copy `skil
 
 - Startup takes a few seconds (yt-dlp extraction). Sync is approximate and drifts over time.
 - Without MPRIS data it falls back to a title search and may play another video.
-- The i3/X11 live mode is off by default (`LFW_LIVE=1` to enable): it crashed Xorg once on an Intel Arc GPU (Mesa glamor). The Hyprland version has no such issue known.
+- The i3/X11 live mode crashed Xorg once on an Intel Arc GPU (Mesa glamor). Disable it with `LFW_LIVE=0` if it happens to you (fullscreen then gives a black wallpaper).
 - Logs: `/tmp/live-fullscreen-wallpaper.log` and `/tmp/live-fullscreen-wallpaper-mpv.log`.
 
 MIT license.
