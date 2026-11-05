@@ -1,6 +1,6 @@
 # live-fullscreen-wallpaper
 
-**Warning: the i3/X11 live mode is experimental (see Limits).** Put a YouTube video fullscreen in Firefox/Chromium/Brave and it also plays as your **live wallpaper**, visible behind your transparent terminals on the other workspaces.
+Put a YouTube video fullscreen in Firefox/Chromium/Brave and it also plays as your **live wallpaper**, visible behind your transparent terminals on the other workspaces.
 
 - YouTube fullscreen: the video plays on the desktop layer (muted, same position as the browser, 720p).
 - Any other fullscreen window (a game...): black wallpaper.
@@ -36,7 +36,7 @@ Let an AI agent do it for you: see [AI_INSTALL.md](AI_INSTALL.md), or copy `skil
 
 - Startup takes a few seconds (yt-dlp extraction). Sync is approximate and drifts over time.
 - Without MPRIS data it falls back to a title search and may play another video.
-- **i3/X11 live mode is opt-in (`LFW_LIVE=1`) and can crash Xorg**: on an Intel Arc B580 with Mesa 26.2.6 it aborted the X server twice (`abort()` inside `libgallium` called from `libglamoregl`), closing every window. Without it, fullscreen gives a black wallpaper. The Hyprland version is not affected by that bug.
+- On an Intel Arc B580 + Mesa 26.2.6, mpv's default GPU output aborted Xorg twice (`abort()` in `libgallium` via `libglamoregl`). The script now forces `--vo=x11 --hwdec=no` (software, no GL/vaapi in the client), which avoids that path. If your X server still dies, set `LFW_LIVE=0`. The Hyprland version is not affected.
 - Logs: `/tmp/live-fullscreen-wallpaper.log` and `/tmp/live-fullscreen-wallpaper-mpv.log`.
 
 MIT license.

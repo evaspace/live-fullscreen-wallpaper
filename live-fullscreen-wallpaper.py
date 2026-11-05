@@ -18,8 +18,8 @@ WALLPAPER_CMD = ["feh", "--bg-fill", WALLPAPER] if WALLPAPER else ["feh", "--bg-
 BLACK_CMD = ["feh", "--bg-fill", os.path.join(HERE, "assets", "black.png")]
 
 BROWSERS = ("firefox", "brave")
-# Opt-in (LFW_LIVE=1): live mode aborts Xorg (glamor/Mesa 26.2.6, Intel Arc B580), see README
-LIVE = os.environ.get("LFW_LIVE") == "1"
+# mpv uses the software x11 vo: its GPU/EGL/vaapi path was running when Xorg aborted in Mesa glamor
+LIVE = os.environ.get("LFW_LIVE") != "0"  # LFW_LIVE=0 disables the live mode
 live = {"title": None, "proc": None, "token": None}
 
 def stop_live():
@@ -66,7 +66,7 @@ def play(title, token):
     # read the position last, so the startup lag of the resolve step is not added to the drift
     pos = playerctl("position") or "0"
     live["proc"] = subprocess.Popen(
-        ["mpv", f"--wid={live['win'].id}", "--no-audio", "--loop", "--no-osc",
+        ["mpv", f"--wid={live['win'].id}", "--no-audio", "--loop", "--no-osc", "--vo=x11", "--hwdec=no", "--profile=fast",
          "--no-input-default-bindings", f"--start={pos}", stream],
         stdout=subprocess.DEVNULL, stderr=open("/tmp/live-fullscreen-wallpaper-mpv.log", "w"))
 
