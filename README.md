@@ -9,6 +9,14 @@ Put a YouTube video fullscreen in Firefox/Chromium/Brave and it also plays as yo
 
 ![screenshot](docs/screenshot.png)
 
+## Supported
+
+| Session | Script | Notes |
+|---|---|---|
+| i3 + picom (X11) | `live-fullscreen-wallpaper.py` | any distro, `install.sh` handles pacman/apt/dnf/zypper |
+| Hyprland (Omarchy, Arch...) | `live-fullscreen-wallpaper-hyprland.py` | needs `mpvpaper` |
+| Sway, GNOME, KDE, other WMs | not supported | PRs welcome |
+
 ## Requirements
 
 i3 on X11, a compositor ([picom](https://github.com/yshui/picom)) and transparent windows (e.g. alacritty `opacity = 0.85`), plus `mpv yt-dlp feh playerctl python-i3ipc python-xlib`. 
